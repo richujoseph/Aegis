@@ -12,7 +12,7 @@ const ResultRandomizer = {
     return arr;
   },
 
-  // Get random subset of array
+  
   randomSubset(array, min, max) {
     const shuffled = this.shuffle(array);
     const count = Math.floor(Math.random() * (max - min + 1)) + min;
