@@ -108,8 +108,51 @@
           renderFileList();
           announce(`${item.file.name} removed`);
         });
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = '8px';
+        const checkBtn = document.createElement('button');
+        checkBtn.className = 'btn';
+        checkBtn.textContent = 'Integrity Check';
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'badge';
+        statusSpan.style.marginLeft = '8px';
+        checkBtn.addEventListener('click', async () => {
+          try {
+            checkBtn.disabled = true;
+            statusSpan.textContent = 'Checking...';
+            const fd = new FormData();
+            fd.append('file', item.file, item.file.name);
+            const res = await fetch(`${API_CONFIG.getEndpoint('INTEGRITY_CHECK')}`, {
+              method: 'POST',
+              body: fd
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Integrity check failed');
+            const leaked = data.leak_check?.leaked;
+            const sha = data.hash?.sha256?.slice(0, 12) || 'unknown';
+            if (leaked) {
+              statusSpan.textContent = `Leaked • sha256:${sha}`;
+              statusSpan.className = 'badge danger';
+              announce(`Leak suspected for ${item.file.name}.`, 'error');
+            } else {
+              statusSpan.textContent = `Clean • sha256:${sha}`;
+              statusSpan.className = 'badge success';
+              announce(`No leaks found for ${item.file.name}.`, 'success');
+            }
+          } catch (err) {
+            statusSpan.textContent = 'Error';
+            statusSpan.className = 'badge warn';
+            announce('Integrity check error: ' + (err.message || 'Failed'), 'error');
+          } finally {
+            checkBtn.disabled = false;
+          }
+        });
+        actions.appendChild(checkBtn);
+        actions.appendChild(statusSpan);
         li.appendChild(thumb);
         li.appendChild(name);
+        li.appendChild(actions);
         li.appendChild(remove);
         fileList.appendChild(li);
       });
@@ -169,8 +212,33 @@
       try {
         showScanning();
         
-        // If YouTube URL is provided, use YouTube analyzer
-        if (youtubeLink) {
+        // If input looks like Instagram, call Instagram analyzer
+        const igUsernameRegex = /^@?[A-Za-z0-9._]{1,30}$/;
+        const igPostUrlRegex = /instagram\.com\/p\/[A-Za-z0-9_-]+\//i;
+        const isInstagramUsername = !youtubeLink.includes('http') && igUsernameRegex.test(youtubeLink);
+        const isInstagramPost = igPostUrlRegex.test(youtubeLink);
+
+        if (isInstagramUsername || isInstagramPost) {
+          const apifyToken = EnvConfig.get('APIFY_TOKEN') || '';
+          const groqKey = EnvConfig.get('GROQ_API_KEY') || '';
+          announce(`🔍 Analyzing Instagram ${isInstagramPost ? 'post' : 'user'}...`);
+          const payload = isInstagramPost ? { post_url: youtubeLink } : { username: youtubeLink };
+          if (apifyToken) payload.apify_token = apifyToken;
+          if (groqKey) payload.groq_api_key = groqKey;
+          payload.comments_limit = 30;
+          const res = await fetch(API_CONFIG.getEndpoint('INSTAGRAM_ANALYZE'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (!result.success) throw new Error(result.error || 'Instagram analysis failed');
+          announce('✅ Instagram analysis completed successfully!', 'success');
+          const appData = result.app_data;
+          populateThreatTab(appData.threat);
+          populatePiracyTab(appData.piracy);
+          populateReports(appData.reports, appData.history);
+        } else if (youtubeLink) {
           const videoId = extractVideoId(youtubeLink);
           if (!videoId) {
               announce('Invalid YouTube URL or video ID', 'error');

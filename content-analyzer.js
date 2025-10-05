@@ -1,14 +1,6 @@
 // ============================================
 // HARASSMENT ANALYSIS WITH OPENAI API
 // ============================================
-// 
-// CONNECT INSTRUCTIONS:
-// 1. Add this code to app.js BEFORE the "// Mock API to simulate backend" section (around line 357)
-// 2. Add the OpenAI API key input field to the Settings section in index.html
-// 3. Update the form submit handler to call harassment analysis when mode is 'harassment' or 'both'
-// 4. Update the mockApi object to include the analyzeHarassment method
-// 5. Update populateReports to handle HTML reports
-// ============================================
 /**
  * Analyzes text content for harassment using OpenAI API
  * CONNECT: This function calls OpenAI API for harassment analysis
@@ -27,7 +19,7 @@
         'Authorization': `Bearer ${GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: '', // CONNECT: You can change to 'gpt-3.5-turbo' for lower cost
+        model: '', 
         messages: [
           {
             role: 'system',

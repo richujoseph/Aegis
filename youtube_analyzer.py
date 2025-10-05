@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-"""
-Real-time YouTube Comment Analyzer for Aegis
-Analyzes YouTube videos for bot comments, spam, and copyright violations
-"""
+
 
 import json
 import sys

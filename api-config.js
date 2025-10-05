@@ -13,7 +13,9 @@ const API_CONFIG = {
     ANALYZE: '/api/analyze',
     SCRAPE: '/api/scrape',
     DETECT_BOTS: '/api/detect-bots',
-    DETECT_COPYRIGHT: '/api/detect-copyright'
+    DETECT_COPYRIGHT: '/api/detect-copyright',
+    INTEGRITY_CHECK: '/api/integrity-check',
+    INSTAGRAM_ANALYZE: '/api/instagram-analyze'
   },
   
   // Get full endpoint URL

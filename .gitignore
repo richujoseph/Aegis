@@ -1,5 +1,5 @@
 # Environment variables (contains API keys - NEVER commit!)
-.env
+.env.*
 
 # Python cache
 __pycache__/

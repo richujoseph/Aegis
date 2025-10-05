@@ -1,5 +1,4 @@
-// Environment Variable Loader for Browser
-// Since browsers can't read .env files directly, we'll use localStorage
+
 
 const EnvConfig = {
   // Load environment variables from localStorage

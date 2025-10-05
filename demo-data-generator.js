@@ -1,5 +1,4 @@
 // Demo Data Generator for Hashtag/Keyword Analysis
-// Generates sample social media data when no YouTube URL is provided
 
 const DemoDataGenerator = {
   // Sample hashtags by category

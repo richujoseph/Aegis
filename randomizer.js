@@ -1,5 +1,3 @@
-// Randomizer Module - Ensures unique results for each scan
-// Adds variety and prevents repetitive outputs
 
 const ResultRandomizer = {
   // Shuffle array using Fisher-Yates algorithm

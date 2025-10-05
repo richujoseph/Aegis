@@ -27,6 +27,13 @@ Aegis is a powerful YouTube comment analysis tool that detects bot comments, har
 - Custom keyword matching
 - DMCA violation identification
 
+### 📱 Instagram Analysis (NEW)
+- Instagram post comment analysis
+- Instagram user comment scraping
+- AI-powered toxicity detection using Groq
+- Harassment level assessment
+- Real-time threat analysis
+
 ### 📊 Analytics & Reporting
 - Threat level assessment (LOW/MODERATE/HIGH/CRITICAL)
 - Interactive dashboard
@@ -116,6 +123,8 @@ Aegis/
 | POST | `/api/scrape` | Scrape comments only | `video_url`, `limit` |
 | POST | `/api/detect-bots` | Detect bot comments | `comments` |
 | POST | `/api/detect-copyright` | Detect violations | `comments`, `keywords` |
+| POST | `/api/integrity-check` | File integrity check | `file` (multipart) |
+| POST | `/api/instagram-analyze` | Instagram analysis | `post_url` or `username` |
 
 ### Example Request
 
@@ -141,8 +150,11 @@ fetch('http://localhost:5000/api/analyze', {
 ### Web Interface
 
 1. **Open the dashboard**: http://localhost:8080/index.html
-2. **Select analysis type**: YouTube Video URL
-3. **Enter video URL**: Paste any YouTube video URL
+2. **Select analysis type**: YouTube Video URL or Instagram
+3. **Enter URL/Username**: 
+   - YouTube: `https://www.youtube.com/watch?v=VIDEO_ID`
+   - Instagram Post: `https://www.instagram.com/p/SHORTCODE/`
+   - Instagram User: `@username` or `username`
 4. **Start analysis**: Click "Start Scan"
 5. **View results**: Check "Threat & Harassment" and "Piracy Protection" tabs
 
@@ -219,6 +231,7 @@ youtube-comment-downloader >= 0.1.73
 requests >= 2.25.0
 beautifulsoup4 >= 4.9.0
 lxml >= 4.6.0
+groq >= 0.12.0
 ```
 
 ### Frontend (JavaScript)

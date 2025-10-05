@@ -1,7 +1,3 @@
-// AI Report Generator
-// Generates formal reports based on scan data using AI services
-// ⚠️ SECURITY: API key loaded from environment variables (localStorage)
-// DO NOT hardcode API keys here - use Settings page instead
 
 const ReportGenerator = {
   // API key loaded from environment variables
