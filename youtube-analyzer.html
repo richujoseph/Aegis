@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aegis - YouTube Comment Analyzer</title>
+  <meta name="description" content="Real-time YouTube Comment Analysis with Bot Detection" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .comment-item {
+      background: #1c2532;
+      border: 1px solid #2b3a4b;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .comment-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .comment-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .comment-time {
+      font-size: 0.85em;
+      color: #9fb1c1;
+    }
+    .comment-text {
+      color: #e6edf3;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .comment-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 0.9em;
+      color: #9fb1c1;
+    }
+    .comment-more {
+      text-align: center;
+      padding: 16px;
+      color: #9fb1c1;
+      font-style: italic;
+    }
+    .bot-indicator, .violation-item {
+      background: #1c2532;
+      border-left: 4px solid #ff5c5c;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+    }
+    .severity-medium {
+      border-left-color: #ffb74d;
+    }
+    .severity-low {
+      border-left-color: #4aa3ff;
+    }
+    .indicator-header, .violation-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .indicator-details, .violation-matches {
+      font-size: 0.9em;
+      color: #9fb1c1;
+    }
+    .violation-text {
+      color: #e6edf3;
+      margin: 12px 0;
+      padding: 12px;
+      background: #0d1117;
+      border-radius: 4px;
+    }
+    .violation-stats {
+      margin-top: 12px;
+      font-size: 0.9em;
+      color: #9fb1c1;
+    }
+    .no-results {
+      text-align: center;
+      padding: 32px;
+      color: #28c76f;
+      font-size: 1.1em;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #1c2532;
+      border: 1px solid #2b3a4b;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2em;
+      font-weight: 700;
+      color: #4aa3ff;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      color: #9fb1c1;
+      font-size: 0.9em;
+    }
+    .video-info {
+      background: #1c2532;
+      border: 1px solid #2b3a4b;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .video-info a {
+      color: #4aa3ff;
+      text-decoration: none;
+    }
+    .video-info a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🎬</div>
+        <div>
+          <h1>Aegis</h1>
+          <span class="subtitle">YouTube Analyzer</span>
+        </div>
+      </div>
+      <nav>
+        <ul>
+          <li><button class="nav-btn active" data-target="home" aria-controls="home" aria-selected="true">🏠 Analyze</button></li>
+          <li><button class="nav-btn" data-target="results" aria-controls="results">📊 Results</button></li>
+          <li><button class="nav-btn" data-target="bots" aria-controls="bots">🤖 Bot Detection</button></li>
+          <li><button class="nav-btn" data-target="copyright" aria-controls="copyright">⚖️ Copyright</button></li>
+        </ul>
+      </nav>
+      <footer>
+        <small>© <span id="year"></span> Aegis</small>
+      </footer>
+    </aside>
+
+    <main class="content" id="main-content">
+      <section id="status-bar" class="status" aria-live="polite" aria-atomic="true" hidden></section>
+
+      <!-- Home Tab - Analyze -->
+      <section id="home" class="tab active" role="region" aria-label="Analyze">
+        <header class="tab-header">
+          <h2>🔍 Analyze YouTube Video</h2>
+          <p>Enter a YouTube URL or video ID to analyze comments for bots and copyright violations.</p>
+        </header>
+
+        <div class="card">
+          <h3>YouTube Video Analysis</h3>
+          <form id="scan-form" class="form">
+            <label for="youtube-link">YouTube URL or Video ID</label>
+            <input id="youtube-link" name="youtube-link" type="text" 
+                   placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ" 
+                   required />
+            <div class="tip">Enter a full YouTube URL or just the 11-character video ID</div>
+
+            <label for="keywords">Keywords (Optional)</label>
+            <input id="keywords" name="keywords" type="text" 
+                   placeholder="movie, leak, download, piracy" />
+            <div class="tip">Comma-separated keywords to detect copyright violations</div>
+
+            <div class="actions">
+              <button id="start-scan" type="submit" class="btn primary">🚀 Start Analysis</button>
+              <button id="reset-form" type="button" class="btn">Reset</button>
+            </div>
+          </form>
+
+          <div class="card" style="margin-top: 24px; background: #0d1117;">
+            <h4>📋 How It Works</h4>
+            <ul style="color: #9fb1c1; line-height: 1.8;">
+              <li>✅ Scrapes up to 200 comments from the YouTube video</li>
+              <li>🤖 Detects duplicate and similar comments (bot activity)</li>
+              <li>⚖️ Identifies potential copyright violations and piracy links</li>
+              <li>📊 Provides detailed analysis and statistics</li>
+              <li>💾 Download results as JSON for further analysis</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Tab -->
+      <section id="results" class="tab" role="region" aria-label="Results">
+        <header class="tab-header">
+          <h2>📊 Analysis Results</h2>
+          <button id="download-results" class="btn">💾 Download JSON</button>
+        </header>
+
+        <div class="video-info">
+          <h3>Video Information</h3>
+          <p><strong>Video ID:</strong> <span id="video-id-display">-</span></p>
+          <p><strong>URL:</strong> <a id="video-url-display" href="#" target="_blank">-</a></p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-comments">0</div>
+            <div class="stat-label">Total Comments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="bot-comments" style="color: #ff5c5c;">0</div>
+            <div class="stat-label">Bot Comments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="copyright-violations" style="color: #ffb74d;">0</div>
+            <div class="stat-label">Copyright Violations</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">
+              <span id="threat-level" class="badge">-</span>
+            </div>
+            <div class="stat-label">Threat Level</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>💬 Comments (First 50)</h3>
+          <div id="comments-list"></div>
+        </div>
+      </section>
+
+      <!-- Bot Detection Tab -->
+      <section id="bots" class="tab" role="region" aria-label="Bot Detection">
+        <header class="tab-header">
+          <h2>🤖 Bot Detection Results</h2>
+          <p>Identified bot activity and spam patterns in comments.</p>
+        </header>
+
+        <div class="card">
+          <h3>Bot Indicators</h3>
+          <div id="bot-indicators-list">
+            <div class="no-results">Run an analysis to see bot detection results</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Copyright Tab -->
+      <section id="copyright" class="tab" role="region" aria-label="Copyright">
+        <header class="tab-header">
+          <h2>⚖️ Copyright Violations</h2>
+          <p>Detected potential copyright violations and piracy links.</p>
+        </header>
+
+        <div class="card">
+          <h3>Violation Reports</h3>
+          <div id="copyright-violations-list">
+            <div class="no-results">Run an analysis to see copyright violation results</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="youtube-app.js"></script>
+</body>
+</html>

@@ -51,7 +51,7 @@
       <section id="home" class="tab active" role="region" aria-label="Home">
         <header class="tab-header">
           <h2>Start a New Scan</h2>
-          <p>Upload media and provide context to initiate AI-powered monitoring.</p>
+          <p>Analyze content using YouTube URLs, hashtags/keywords, or uploaded files. Multiple methods can be combined.</p>
         </header>
 
         <div class="grid two">
@@ -80,17 +80,16 @@
               <input id="keywords" name="keywords" type="text" placeholder="#FilmName, #ActorName" aria-describedby="keywords-tip" />
               <div id="keywords-tip" class="tip">Comma-separated values. Example: #FilmName, leak, camrip</div>
 
-              <label for="links">Social Media Links</label>
-              <textarea id="links" name="links" rows="3" placeholder="Paste URLs (one per line) for Instagram, X, YouTube, Facebook..."></textarea>
+              <label for="youtube-link">YouTube Video URL or ID (Optional)</label>
+              <input id="youtube-link" name="youtube-link" type="text" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ" />
+              <div class="tip">Optional: Enter YouTube URL to analyze video comments. Leave empty to analyze by hashtags/files only</div>
 
-              <label for="watchlist">Watchlist (Accounts/Groups)</label>
-              <textarea id="watchlist" name="watchlist" rows="3" placeholder="Known piracy or troll accounts (one per line)"></textarea>
 
               <label for="scan-mode">Scan Mode</label>
               <select id="scan-mode" name="scanMode">
-                <option value="harassment">Harassment Analysis</option>
-                <option value="piracy">Piracy Detection</option>
-                <option value="both" selected>Both</option>
+                <option value="harassment">Harassment Analysis (Body Shaming, Personal Attacks)</option>
+                <option value="piracy">Piracy Detection (Copyright Violations)</option>
+                <option value="both" selected>Both (Harassment + Piracy)</option>
               </select>
 
               <div class="actions">
@@ -139,6 +138,7 @@
                 <th>Handle</th>
                 <th>Platform</th>
                 <th>Risk</th>
+                <th>Comment/Content</th>
                 <th>Last Seen</th>
                 <th>Actions</th>
               </tr>
@@ -262,7 +262,7 @@
   <script src="env-loader.js"></script>
   <script src="config.js"></script>
   <script src="randomizer.js"></script>
-  <script src="database/social-media-db.js"></script>
+  <script src="demo-data-generator.js"></script>
   <script src="report-generator.js"></script>
   <script src="app.js"></script>
 </body>
