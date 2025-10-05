@@ -16,8 +16,9 @@ from difflib import SequenceMatcher
 # Fix Windows console encoding
 if sys.platform == "win32":
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    if hasattr(sys.stdout, 'detach'):
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
 
 class YouTubeAnalyzer:
     def __init__(self):
