@@ -1,0 +1,20 @@
+<!-- ============================================ -->
+<!-- ADD THIS TO index.html IN THE SETTINGS FORM -->
+<!-- ============================================ -->
+<!-- 
+CONNECT INSTRUCTIONS:
+Add this field to the settings form in index.html (around line 228, BEFORE the "Trusted Accounts" field)
+-->
+
+<label for="openai-api-key">OpenAI API Key (for Harassment Analysis)</label>
+<input 
+  id="openai-api-key" 
+  type="password" 
+  placeholder="sk-..." 
+  aria-describedby="api-key-tip"
+/>
+<div id="api-key-tip" class="tip">
+  Required for AI-powered harassment analysis. Get your API key from 
+  <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI Platform</a>. 
+  Your key is stored locally and never sent to our servers.
+</div>
