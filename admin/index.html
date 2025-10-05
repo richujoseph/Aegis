@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Social Media Database</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      color: #667eea;
+      font-size: 28px;
+    }
+
+    .header .stats {
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 10px 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .stat-box .number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-box .label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .card h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .file-upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+    }
+
+    .file-upload-area:hover {
+      border-color: #667eea;
+      background: #f8f9fa;
+    }
+
+    .file-upload-area.active {
+      border-color: #667eea;
+      background: #e7eaff;
+    }
+
+    .file-list {
+      margin-top: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .file-item button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .file-item button:hover {
+      background: #c82333;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .user-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .user-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+      transition: all 0.3s;
+    }
+
+    .user-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateX(5px);
+    }
+
+    .user-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .user-card-header h3 {
+      color: #333;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .platform-badge {
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .user-card-body {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .user-card-body .hashtags {
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .user-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .media-count {
+      display: flex;
+      gap: 15px;
+    }
+
+    .media-count span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .user-actions button {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .alert {
+      padding: 12px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .export-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔐 Admin Panel - Social Media Database</h1>
+      <div class="stats">
+        <div class="stat-box">
+          <div class="number" id="total-users">0</div>
+          <div class="label">Total Users</div>
+        </div>
+        <div class="stat-box">
+          <div class="number" id="total-media">0</div>
+          <div class="label">Total Media</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <div class="main-content">
+      <div class="card">
+        <h2>➕ Add New User</h2>
+        <form id="add-user-form">
+          <div class="form-group">
+            <label for="username">Username *</label>
+            <input type="text" id="username" required placeholder="e.g., john_doe">
+          </div>
+
+          <div class="form-group">
+            <label for="platform">Platform *</label>
+            <select id="platform" required>
+              <option value="">Select Platform</option>
+              <option value="Instagram">Instagram</option>
+              <option value="YouTube">YouTube</option>
+              <option value="X">X (Twitter)</option>
+              <option value="Facebook">Facebook</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Telegram">Telegram</option>
+              <option value="Twitch">Twitch</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="hashtags">Hashtags</label>
+            <input type="text" id="hashtags" placeholder="#example, #tags">
+          </div>
+
+          <div class="form-group">
+            <label for="comments">Comments</label>
+            <textarea id="comments" placeholder="User's latest comment or bio"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="followers">Followers</label>
+            <input type="number" id="followers" placeholder="e.g., 10000">
+          </div>
+
+          <div class="form-group">
+            <label for="engagement">Engagement Level</label>
+            <select id="engagement">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Pictures</label>
+            <div class="file-upload-area" id="picture-upload">
+              <p>📷 Click or drag pictures here</p>
+              <input type="file" id="pictures" accept="image/*" multiple style="display:none;">
+            </div>
+            <div class="file-list" id="picture-list"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Videos</label>
+            <div class="file-upload-area" id="video-upload">
+              <p>🎥 Click or drag videos here</p>
+              <input type="file" id="videos" accept="video/*" multiple style="display:none;">
+            </div>
+            <div class="file-list" id="video-list"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">➕ Add User</button>
+          <button type="button" class="btn btn-secondary" onclick="resetForm()">🔄 Reset</button>
+        </form>
+
+        <div class="export-section">
+          <h2>📥 Export Data</h2>
+          <div class="export-buttons">
+            <button class="btn btn-success" onclick="exportToJSON()">📄 Export JSON</button>
+            <button class="btn btn-success" onclick="exportToCSV()">📊 Export CSV</button>
+            <button class="btn btn-secondary" onclick="backupDatabase()">💾 Backup Database</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>👥 User Database</h2>
+        <div class="search-box">
+          <input type="text" id="search" placeholder="🔍 Search by username, hashtags, or platform...">
+        </div>
+        <div class="user-list" id="user-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../database/social-media-db.js"></script>
+  <script src="admin-panel.js"></script>
+</body>
+</html>
