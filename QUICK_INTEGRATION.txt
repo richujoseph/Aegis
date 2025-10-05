@@ -1,0 +1,232 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    HARASSMENT ANALYSIS - QUICK INTEGRATION                   ║
+║                         All Connection Points Commented                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📋 FILES TO EDIT:
+  1. index.html (1 change)
+  2. app.js (6 changes)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 FILE 1: index.html
+═══════════════════════════════════════════════════════════════════════════════
+
+🔍 FIND (around line 227):
+    <label for="trusted-accounts">Trusted Accounts (excluded)</label>
+
+📝 ADD BEFORE IT:
+    <label for="openai-api-key">OpenAI API Key (for Harassment Analysis)</label>
+    <input id="openai-api-key" type="password" placeholder="sk-..." />
+    <div class="tip">Get your key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></div>
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 FILE 2: app.js
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CHANGE 1: Add Harassment Analysis Functions                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔍 FIND (around line 356):
+    // Mock API to simulate backend
+
+📝 ADD BEFORE IT (copy from harassment-analysis.js lines 1-200):
+    // ============================================
+    // HARASSMENT ANALYSIS WITH OPENAI API
+    // ============================================
+    
+    async function analyzeHarassmentWithOpenAI(text, apiKey) {
+      // ... (full function from harassment-analysis.js)
+    }
+    
+    function generateHarassmentReport(analysisData, scanContext) {
+      // ... (full function from harassment-analysis.js)
+    }
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CHANGE 2: Update mockApi Object                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔍 FIND (around line 367):
+      generateTakedown(itemId){
+        return new Promise((resolve) => setTimeout(() => resolve({ ok:true, message:`Takedown notice generated for ${itemId}` }), 600));
+      }
+    };
+
+📝 REPLACE WITH:
+      generateTakedown(itemId){
+        return new Promise((resolve) => setTimeout(() => resolve({ ok:true, message:`Takedown notice generated for ${itemId}` }), 600));
+      },
+      // CONNECT: New method for harassment analysis with OpenAI
+      async analyzeHarassment(text, apiKey) {
+        return await analyzeHarassmentWithOpenAI(text, apiKey);
+      }
+    };
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CHANGE 3: Update Form Submit Handler - Part A                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔍 FIND (around line 140):
+      try {
+        showScanning();
+        // Mock API call
+        const job = await mockApi.startScan(data);
+
+📝 REPLACE WITH:
+      try {
+        showScanning();
+        
+        // CONNECT: Check if harassment analysis is selected
+        const scanMode = $('#scan-mode').value;
+        let harassmentAnalysis = null;
+        let harassmentReport = null;
+        
+        if (scanMode === 'harassment' || scanMode === 'both') {
+          const apiKey = localStorage.getItem('imcps:openai_key');
+          
+          if (!apiKey || apiKey === 'YOUR_OPENAI_API_KEY_HERE') {
+            announce('⚠️ OpenAI API key not configured. Please add it in Settings.', 'error');
+          } else {
+            try {
+              announce('Analyzing harassment with OpenAI...');
+              
+              const textToAnalyze = `
+                Keywords: ${$('#keywords').value}
+                Watchlist: ${$('#watchlist').value}
+                Links: ${$('#links').value}
+              `.trim();
+              
+              if (textToAnalyze.length > 20) {
+                harassmentAnalysis = await mockApi.analyzeHarassment(textToAnalyze, apiKey);
+                
+                const scanContext = {
+                  filesCount: selectedFiles.length,
+                  keywords: $('#keywords').value,
+                  linksCount: ($('#links').value.split('\n').filter(l => l.trim()).length),
+                  scanMode: scanMode
+                };
+                
+                harassmentReport = generateHarassmentReport(harassmentAnalysis, scanContext);
+                announce('✅ Harassment analysis completed with OpenAI');
+              }
+            } catch (apiError) {
+              console.error('OpenAI API Error:', apiError);
+              announce('⚠️ OpenAI analysis failed: ' + apiError.message, 'error');
+            }
+          }
+        }
+        
+        // Mock API call
+        const job = await mockApi.startScan(data);
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CHANGE 4: Update Form Submit Handler - Part B                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔍 FIND (around line 148):
+        announce('Scan completed. Displaying results.');
+        // Hydrate tabs with result data
+        populateThreatTab(result.threat);
+
+📝 REPLACE WITH:
+        // CONNECT: Add harassment report to results if available
+        if (harassmentReport) {
+          result.reports.unshift({
+            type: 'Harassment Analysis Report (HTML)',
+            date: new Date().toLocaleString(),
+            filename: `harassment_report_${Date.now()}.html`,
+            content: harassmentReport,
+            analysis: harassmentAnalysis
+          });
+        }
+        
+        announce('Scan completed. Displaying results.');
+        // Hydrate tabs with result data
+        populateThreatTab(result.threat);
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CHANGE 5: Update populateReports Function                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔍 FIND (around line 319):
+        li.querySelector('button').addEventListener('click', ()=> downloadBlob(new Blob([r.content], {type:'application/pdf'}), r.filename));
+
+📝 REPLACE WITH:
+        li.querySelector('button').addEventListener('click', ()=> {
+          // CONNECT: Determine content type based on file extension
+          const isHTML = r.filename.endsWith('.html');
+          const contentType = isHTML ? 'text/html' : 'application/pdf';
+          downloadBlob(new Blob([r.content], {type: contentType}), r.filename);
+        });
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CHANGE 6: Update Settings Form Handler                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔍 FIND (around line 337):
+    if(saved.trusted) $('#trusted-accounts').value = saved.trusted;
+    settingsForm.addEventListener('submit', e => {
+
+📝 REPLACE WITH:
+    if(saved.trusted) $('#trusted-accounts').value = saved.trusted;
+    
+    // CONNECT: Load OpenAI API key if exists
+    const savedApiKey = localStorage.getItem('imcps:openai_key');
+    if (savedApiKey && $('#openai-api-key')) {
+      $('#openai-api-key').value = savedApiKey;
+    }
+    
+    settingsForm.addEventListener('submit', e => {
+
+AND
+
+🔍 FIND (around line 345):
+      localStorage.setItem('imcps:settings', JSON.stringify(payload));
+      announce('Settings saved');
+    });
+
+📝 REPLACE WITH:
+      localStorage.setItem('imcps:settings', JSON.stringify(payload));
+      
+      // CONNECT: Save OpenAI API key
+      const apiKeyInput = $('#openai-api-key');
+      if (apiKeyInput && apiKeyInput.value.trim()) {
+        localStorage.setItem('imcps:openai_key', apiKeyInput.value.trim());
+        announce('Settings saved (including OpenAI API key)');
+      } else {
+        announce('Settings saved');
+      }
+    });
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ TESTING CHECKLIST:
+═══════════════════════════════════════════════════════════════════════════════
+
+□ 1. Get OpenAI API key from https://platform.openai.com/api-keys
+□ 2. Open your app and go to Settings
+□ 3. Paste API key in "OpenAI API Key" field
+□ 4. Click "Save Settings"
+□ 5. Go to Home tab
+□ 6. Enter test keywords: "hate speech, threats, bullying"
+□ 7. Select "Harassment Analysis" mode
+□ 8. Click "Start Scan"
+□ 9. Wait for "✅ Harassment analysis completed" message
+□ 10. Go to Reports tab
+□ 11. Click "Download" on "Harassment Analysis Report (HTML)"
+□ 12. Open downloaded HTML file in browser
+□ 13. Verify report shows analysis results
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 SUMMARY:
+  • All connection points are marked with // CONNECT: comments
+  • OpenAI API analyzes text for harassment when mode is selected
+  • Professional HTML report is generated automatically
+  • Report includes severity, categories, sentiment, and recommendations
+  • API key stored securely in browser localStorage
+
+═══════════════════════════════════════════════════════════════════════════════
