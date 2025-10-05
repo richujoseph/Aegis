@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aegis Dashboard</title>
+  <meta name="description" content="Intelligent Monitoring & Copyright Protection System" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Network Graph -->
+  <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+  <!-- Map (Leaflet) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🎬</div>
+        <div>
+          <h1>Aegis</h1>
+          <span class="subtitle">AI Monitoring & Protection</span>
+        </div>
+      </div>
+      <nav>
+        <ul>
+          <li><button class="nav-btn active" data-target="home" aria-controls="home" aria-selected="true">Home</button></li>
+          <li><button class="nav-btn" data-target="threat" aria-controls="threat">Threat & Harassment</button></li>
+          <li><button class="nav-btn" data-target="piracy" aria-controls="piracy">Piracy Protection</button></li>
+          <li><button class="nav-btn" data-target="reports" aria-controls="reports">Reports</button></li>
+          <li><button class="nav-btn" data-target="settings" aria-controls="settings">Settings</button></li>
+        </ul>
+      </nav>
+      <footer>
+        <small>© <span id="year"></span> Aegis</small>
+      </footer>
+    </aside>
+
+    <main class="content" id="main-content">
+      <section id="status-bar" class="status" aria-live="polite" aria-atomic="true" hidden></section>
+
+      <!-- Home Tab -->
+      <section id="home" class="tab active" role="region" aria-label="Home">
+        <header class="tab-header">
+          <h2>Start a New Scan</h2>
+          <p>Upload media and provide context to initiate AI-powered monitoring.</p>
+        </header>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Upload Content</h3>
+            <p class="help">Drag & drop files or click to upload. Accepted: MP4, MOV, MP3, WAV, JPG, PNG.</p>
+            <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-describedby="upload-help">
+              <input id="file-input" class="visually-hidden" type="file" multiple accept="video/mp4,video/quicktime,audio/mpeg,audio/wav,image/jpeg,image/png,image/webp,application/pdf,application/zip" />
+              <div class="drop-inner">
+                <div class="drop-icon">⬆️</div>
+                <div>
+                  <strong>Drop files here</strong>
+                  <div>or click to browse</div>
+                </div>
+              </div>
+            </div>
+            <div id="upload-help" class="sr-help">Use Space or Enter to open file dialog. You can add multiple files.</div>
+
+            <ul id="file-list" class="file-list" aria-label="Selected files"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Context & Options</h3>
+            <form id="scan-form" class="form">
+              <label for="keywords">Keywords / Hashtags</label>
+              <input id="keywords" name="keywords" type="text" placeholder="#FilmName, #ActorName" aria-describedby="keywords-tip" />
+              <div id="keywords-tip" class="tip">Comma-separated values. Example: #FilmName, leak, camrip</div>
+
+              <label for="links">Social Media Links</label>
+              <textarea id="links" name="links" rows="3" placeholder="Paste URLs (one per line) for Instagram, X, YouTube, Facebook..."></textarea>
+
+              <label for="watchlist">Watchlist (Accounts/Groups)</label>
+              <textarea id="watchlist" name="watchlist" rows="3" placeholder="Known piracy or troll accounts (one per line)"></textarea>
+
+              <label for="scan-mode">Scan Mode</label>
+              <select id="scan-mode" name="scanMode">
+                <option value="harassment">Harassment Analysis</option>
+                <option value="piracy">Piracy Detection</option>
+                <option value="both" selected>Both</option>
+              </select>
+
+              <div class="actions">
+                <button id="start-scan" type="submit" class="btn primary">Start Scan</button>
+                <button id="reset-form" type="button" class="btn">Reset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Threat & Harassment Monitor Tab -->
+      <section id="threat" class="tab" role="region" aria-label="Threat & Harassment Monitor">
+        <header class="tab-header">
+          <h2>Threat & Harassment Monitor</h2>
+          <p>Results from harassment analysis including network, sentiment, timeline, and flagged accounts.</p>
+        </header>
+
+        <div class="grid three">
+          <div class="card">
+            <h3>Network Graph</h3>
+            <div id="network-graph" class="graph" role="img" aria-label="Suspicious accounts network graph"></div>
+          </div>
+          <div class="card">
+            <h3>Sentiment Analysis</h3>
+            <canvas id="sentiment-chart" height="180" aria-label="Sentiment distribution" role="img"></canvas>
+          </div>
+          <div class="card">
+            <h3>Campaign Timeline</h3>
+            <canvas id="timeline-chart" height="180" aria-label="Harassment activity over time" role="img"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Flagged Accounts</h3>
+            <div class="spacer"></div>
+            <div class="controls">
+              <input id="flagged-filter" type="search" placeholder="Filter by handle or platform" />
+              <button id="export-flagged" class="btn">Export CSV</button>
+            </div>
+          </div>
+          <table class="table" aria-label="List of flagged accounts">
+            <thead>
+              <tr>
+                <th>Handle</th>
+                <th>Platform</th>
+                <th>Risk</th>
+                <th>Last Seen</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="flagged-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Piracy Protection Tab -->
+      <section id="piracy" class="tab" role="region" aria-label="Piracy & Copyright Protection">
+        <header class="tab-header">
+          <h2>Piracy & Copyright Protection</h2>
+          <p>Detected pirated content, spread map, and takedown controls.</p>
+        </header>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-header">
+              <h3>Detected Items</h3>
+              <div class="spacer"></div>
+              <div class="controls row">
+                <select id="filter-platform">
+                  <option value="all">All Platforms</option>
+                  <option value="YouTube">YouTube</option>
+                  <option value="Telegram">Telegram</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="X">X</option>
+                </select>
+                <select id="filter-severity">
+                  <option value="all">All Severities</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+            </div>
+            <div id="piracy-list" class="list" aria-live="polite"></div>
+          </div>
+
+          <div class="card">
+            <h3>Piracy Spread Map</h3>
+            <div id="spread-map" class="map" aria-label="Piracy spread map" role="img"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reports Tab -->
+      <section id="reports" class="tab" role="region" aria-label="Reports">
+        <header class="tab-header">
+          <h2>Reports & History</h2>
+          <p>Download cybercrime and copyright reports, and view scan history.</p>
+        </header>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Available Reports</h3>
+            <ul id="reports-list" class="report-list"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Scan History</h3>
+            <ul id="history-list" class="history-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Tab -->
+      <section id="settings" class="tab" role="region" aria-label="Settings">
+        <header class="tab-header">
+          <h2>Settings</h2>
+          <p>Configure defaults, monitoring, and exclusions.</p>
+        </header>
+
+        <form id="settings-form" class="form narrow">
+          <h3>🤖 AI Configuration</h3>
+          
+          <label for="groq-api-key">Groq API Key</label>
+          <input type="password" id="groq-api-key" placeholder="gsk_..." />
+          <div class="tip">Get your free API key from <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a></div>
+          
+          <label for="groq-model">AI Model</label>
+          <select id="groq-model">
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B (Recommended)</option>
+            <option value="llama2-70b-4096">Llama 2 70B</option>
+            <option value="gemma-7b-it">Gemma 7B</option>
+          </select>
+          
+          <div class="switch">
+            <input type="checkbox" id="groq-enabled" />
+            <label for="groq-enabled">Enable AI-powered reports</label>
+          </div>
+          
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;" />
+          
+          <h3>⚙️ General Settings</h3>
+          
+          <label for="default-mode">Default Scan Mode</label>
+          <select id="default-mode">
+            <option value="harassment">Harassment Analysis</option>
+            <option value="piracy">Piracy Detection</option>
+            <option value="both" selected>Both</option>
+          </select>
+
+          <div class="switch">
+            <input type="checkbox" id="continuous-monitoring" />
+            <label for="continuous-monitoring">Enable real-time continuous monitoring</label>
+          </div>
+
+          <label for="trusted-accounts">Trusted Accounts (excluded)</label>
+          <textarea id="trusted-accounts" rows="3" placeholder="@officialAccount, @partner"></textarea>
+
+          <div class="actions">
+            <button type="submit" class="btn primary">Save Settings</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="env-loader.js"></script>
+  <script src="config.js"></script>
+  <script src="randomizer.js"></script>
+  <script src="database/social-media-db.js"></script>
+  <script src="report-generator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
