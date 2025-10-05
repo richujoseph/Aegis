@@ -1,5 +1,3 @@
-// Configuration file for Aegis
-
 
 const AegisConfig = {
   groq: {
