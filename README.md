@@ -1,4 +1,4 @@
-# 🎬 Aegis - YouTube Comment Analyzer
+# 🎬 Aegis
 
 **Intelligent Monitoring & Copyright Protection System**
 
