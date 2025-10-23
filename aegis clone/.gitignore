@@ -1,0 +1,18 @@
+# Environment variables
+.env
+
+# Output files
+idsUser.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+
+# IDE specific files
+.vscode/
+.idea/
